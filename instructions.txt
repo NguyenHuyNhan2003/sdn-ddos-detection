@@ -1,0 +1,36 @@
+# move to folder
+cd /home/ubuntu/final-project
+
+# run docker
+sudo docker run -it --rm --privileged --network=host \
+  -v /home/ubuntu/final-project:/ryu/app \
+  --name ryu-mininet osrg/ryu bash
+  
+# collect normal traffic  
+PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager ryu_collect_normal_traffic
+sudo python3 generate_normal_trafic.py
+
+# collect ddos traffic
+PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager ryu_collect_ddos_traffic
+sudo python3 generate_ddos_trafic.py
+
+
+# collect normal traffic---lab  
+PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_col_nor_traf
+sudo python3 lab_gen_nor_traf.py
+
+
+# collect ddos traffic---lab
+PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_col_ddos_traf
+sudo python3 lab_gen_ddos_traf.py
+
+sudo mn -c
+
+
+# test
+PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_ddos_monitor
+sudo python3 lab_attack.py
+
+# pip install numpy==1.16.6
+# pip install "scipy==1.2.2"
+# pip install "scikit-learn==0.20.4" --no-deps
