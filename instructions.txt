@@ -7,29 +7,32 @@ sudo docker run -it --rm --privileged --network=host \
   --name ryu-mininet osrg/ryu bash
   
 # collect normal traffic  
-PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager ryu_collect_normal_traffic
+ryu-manager ryu_collect_normal_traffic
 sudo python3 generate_normal_trafic.py
 
 # collect ddos traffic
-PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager ryu_collect_ddos_traffic
+ryu-manager ryu_collect_ddos_traffic
 sudo python3 generate_ddos_trafic.py
 
+# attack
+sudo python3 sdn_topo.py
 
 # collect normal traffic---lab  
-PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_col_nor_traf
+ryu-manager lab_col_nor_traf
 sudo python3 lab_gen_nor_traf.py
 
 
 # collect ddos traffic---lab
-PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_col_ddos_traf
+ryu-manager lab_col_ddos_traf
 sudo python3 lab_gen_ddos_traf.py
 
 sudo mn -c
 
 
 # test
-PYTHONPATH=/ryu/app:$PYTHONPATH ryu-manager lab_ddos_monitor
+ryu-manager lab_ddos_monitor
 sudo python3 lab_attack.py
+h1 hping3 -1 -V -d 120 -w 64 -p 80 --rand-source --flood h3
 
 # pip install numpy==1.16.6
 # pip install "scipy==1.2.2"

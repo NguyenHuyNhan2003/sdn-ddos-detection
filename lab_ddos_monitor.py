@@ -22,14 +22,14 @@ class DDoS_Monitor(SimpleSwitch13):
         self.flow_model = None
         
         # DUONG DAN TUYET DOI
-        self.TRAIN_FILE = '/ryu/app/FlowStatsfile.csv'
-        self.PREDICT_FILE = '/ryu/app/PredictFlowStatsfile.csv'
+        self.TRAIN_FILE = 'FlowStatsfile.csv'
+        self.PREDICT_FILE = 'PredictFlowStatsfile.csv'
 
         self.logger.info("DEBUG: System Starting...")
         start = datetime.now()
         self.flow_training()
         end = datetime.now()
-        print "Training time: ", (end - start)
+        print("Training time: ", (end - start))
 
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
@@ -83,12 +83,12 @@ class DDoS_Monitor(SimpleSwitch13):
                                         eth_type=ether_types.ETH_TYPE_IP,
                                         ipv4_src=ip_pkt.src, ipv4_dst=ip_pkt.dst)
                 # Priority 1 cho traffic thuong
-                self.add_flow(datapath, 1, match, actions, msg.buffer_id)
+                self.add_flow(datapath, 1, match, actions, msg.buffer_id, idle_timeout=10)
                 return
             else:
                 # Neu khong phai IP (VD: ARP), chi match MAC nhu cu
                 match = parser.OFPMatch(in_port=in_port, eth_dst=dst, eth_src=src)
-                self.add_flow(datapath, 1, match, actions, msg.buffer_id)
+                self.add_flow(datapath, 1, match, actions, msg.buffer_id, idle_timeout=10)
         
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
@@ -106,7 +106,7 @@ class DDoS_Monitor(SimpleSwitch13):
             else:
                 for dp in self.datapaths.values():
                     self._request_stats(dp)
-            hub.sleep(10)
+            hub.sleep(5)
             if self.flow_model is not None:
                 self.flow_predict()
 
@@ -347,7 +347,7 @@ class DDoS_Monitor(SimpleSwitch13):
         start = datetime.now()
         self.flow_training()
         end = datetime.now()
-        print "Training time: ", (end - start)
+        print("Training time: ", (end - start))
 
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
@@ -383,7 +383,7 @@ class DDoS_Monitor(SimpleSwitch13):
             import time
             timestamp = time.time()
 
-        with open("/ryu/app/PredictFlowStatsfile.csv", "w") as file0:
+        with open("PredictFlowStatsfile.csv", "w") as file0:
             file0.write('timestamp,datapath_id,flow_id,ip_src,tp_src,ip_dst,tp_dst,ip_proto,icmp_code,icmp_type,flow_duration_sec,flow_duration_nsec,idle_timeout,hard_timeout,flags,packet_count,byte_count,packet_count_per_second,packet_count_per_nsecond,byte_count_per_second,byte_count_per_nsecond\n')
             
             body = ev.msg.body
@@ -441,13 +441,13 @@ class DDoS_Monitor(SimpleSwitch13):
 
     def flow_training(self):
         self.logger.info("Flow Training (Optimized) ...")
-        if not os.path.exists('/ryu/app/FlowStatsfile.csv'):
+        if not os.path.exists('FlowStatsfile.csv'):
             self.logger.warning("No dataset found.")
             return
 
         try:
             data_rows = []
-            with open('/ryu/app/FlowStatsfile.csv', 'r') as f:
+            with open('FlowStatsfile.csv', 'r') as f:
                 reader = csv.reader(f)
                 next(reader) # Skip header
                 for row in reader:
@@ -488,11 +488,11 @@ class DDoS_Monitor(SimpleSwitch13):
 
     def flow_predict(self):
         try:
-            if not os.path.exists('/ryu/app/PredictFlowStatsfile.csv') or os.stat('/ryu/app/PredictFlowStatsfile.csv').st_size == 0:
+            if not os.path.exists('PredictFlowStatsfile.csv') or os.stat('PredictFlowStatsfile.csv').st_size == 0:
                 return
 
             data_rows = []
-            with open('/ryu/app/PredictFlowStatsfile.csv', 'r') as f:
+            with open('PredictFlowStatsfile.csv', 'r') as f:
                 reader = csv.reader(f)
                 next(reader) 
                 for row in reader:
@@ -576,5 +576,4 @@ class DDoS_Monitor(SimpleSwitch13):
                                     match=match, instructions=inst, 
                                     idle_timeout=idle_timeout)
         datapath.send_msg(mod)
-        
-'''
+'''        

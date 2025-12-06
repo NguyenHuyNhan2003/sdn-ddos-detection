@@ -20,7 +20,7 @@ class CollectTrainingStatsApp(switch.SimpleSwitch13):
         self.datapaths = {}
         self.monitor_thread = hub.spawn(self.monitor)
         
-        self.file_path = "/ryu/app/FlowStatsfile.csv"
+        self.file_path = "FlowStatsfile.csv"
         
         if not os.path.exists(self.file_path):
             with open(self.file_path, "w") as file0:
@@ -132,7 +132,7 @@ class CollectTrainingStatsApp(switch.SimpleSwitch13):
         tp_src = 0
         tp_dst = 0
 
-        file0 = open("/ryu/app/FlowStatsfile.csv", "a")
+        file0 = open("FlowStatsfile.csv", "a")
         body = ev.msg.body
         for stat in sorted([flow for flow in body if (flow.priority == 1) ], key=lambda flow:
             (flow.match['eth_type'],flow.match['ipv4_src'],flow.match['ipv4_dst'],flow.match['ip_proto'])):        
