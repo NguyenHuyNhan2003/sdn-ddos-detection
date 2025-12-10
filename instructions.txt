@@ -1,11 +1,15 @@
+#mininet - xterm
+sudo apt-get update
+sudo apt-get install xterm
+
+xhost + 
+# access control disabled, clients can connect from any host - is successful
+# run mininet with new command line
+sudo -E python lab_attack.py
+
 # move to folder
 cd /home/ubuntu/final-project
 
-# run docker
-sudo docker run -it --rm --privileged --network=host \
-  -v /home/ubuntu/final-project:/ryu/app \
-  --name ryu-mininet osrg/ryu bash
-  
 # collect normal traffic  
 ryu-manager ryu_collect_normal_traffic
 sudo python3 generate_normal_trafic.py
@@ -20,7 +24,6 @@ sudo python3 sdn_topo.py
 # collect normal traffic---lab  
 ryu-manager lab_col_nor_traf
 sudo python3 lab_gen_nor_traf.py
-
 
 # collect ddos traffic---lab
 ryu-manager lab_col_ddos_traf
@@ -37,3 +40,14 @@ h1 hping3 -1 -V -d 120 -w 64 -p 80 --rand-source --flood h3
 # pip install numpy==1.16.6
 # pip install "scipy==1.2.2"
 # pip install "scikit-learn==0.20.4" --no-deps
+
+# ping test DDoS
+# ICMP Flood
+hping3 -1 -V --flood --rand-source 10.0.0.3
+
+# UDP Flood
+hping3 -2 -V --flood --rand-source -p 80 10.0.0.3
+
+#Truyền tải file hợp lệ(iperf)
+iperf -s  # tai h3
+iperf -c 10.0.0.3 -t 10 # h1 client
